@@ -13,39 +13,53 @@
 
 ## Quick Start
 
+### Set up the environment
+
+The project is uv-managed; `uv sync` creates `.venv/` from `uv.lock` with the interpreter pinned by `.python-version`.
+
+```bash
+# Install uv once (skip if already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# From the project root
+uv sync
+uv run pytest
+```
+
 ### SSH into VM
 
 ```bash
 gcloud compute ssh <VM_NAME> --zone <ZONE> --project <GCP_PROJECT>
 cd ~/<PROJECT_NAME>
+uv sync   # first time on the VM
 ```
 
 ### Train
 
 ```bash
 # Smoke test (1 epoch, verify pipeline works)
-python -m <PACKAGE_NAME>.training.train --config configs/train/smoke_test.yaml
+uv run python -m <PACKAGE_NAME>.training.train --config configs/train/smoke_test.yaml
 
 # Full training run
-python -m <PACKAGE_NAME>.training.train --config configs/train/<EXPERIMENT>.yaml
+uv run python -m <PACKAGE_NAME>.training.train --config configs/train/<EXPERIMENT>.yaml
 
 # Continue from a previous run's checkpoint (different optimizer/LR)
-python -m <PACKAGE_NAME>.training.train --config configs/train/<EXPERIMENT>_cont.yaml
+uv run python -m <PACKAGE_NAME>.training.train --config configs/train/<EXPERIMENT>_cont.yaml
 
 # Resume from last checkpoint (same config, pick up where it left off)
-python -m <PACKAGE_NAME>.training.train --config configs/train/<EXPERIMENT>.yaml --resume
+uv run python -m <PACKAGE_NAME>.training.train --config configs/train/<EXPERIMENT>.yaml --resume
 ```
 
 ### Evaluate
 
 ```bash
 # Single dataset
-python -m <PACKAGE_NAME>.training.evaluate \
+uv run python -m <PACKAGE_NAME>.training.evaluate \
     --config configs/train/<EXPERIMENT>.yaml \
     --checkpoint checkpoints/<RUN_ID>/weights/best.pt
 
 # Cross-dataset evaluation
-python -m <PACKAGE_NAME>.training.evaluate_all \
+uv run python -m <PACKAGE_NAME>.training.evaluate_all \
     --checkpoint checkpoints/<RUN_ID>/weights/best.pt \
     --datasets <dataset1> <dataset2> \
     --batch 64
@@ -55,16 +69,16 @@ python -m <PACKAGE_NAME>.training.evaluate_all \
 
 ```bash
 # Single run
-python -m <PACKAGE_NAME>.training.plot_metrics --run_dir checkpoints/<RUN_ID>
+uv run python -m <PACKAGE_NAME>.training.plot_metrics --run_dir checkpoints/<RUN_ID>
 
 # Compare multiple runs
-python -m <PACKAGE_NAME>.training.plot_metrics --compare checkpoints/run_001 checkpoints/run_002
+uv run python -m <PACKAGE_NAME>.training.plot_metrics --compare checkpoints/run_001 checkpoints/run_002
 ```
 
 ### Visualize Predictions
 
 ```bash
-python -m <PACKAGE_NAME>.training.visualize \
+uv run python -m <PACKAGE_NAME>.training.visualize \
     --config configs/train/<EXPERIMENT>.yaml \
     --checkpoint checkpoints/<RUN_ID>/weights/best.pt \
     --num_samples 16
@@ -74,7 +88,7 @@ python -m <PACKAGE_NAME>.training.visualize \
 
 ```bash
 # Returns exit code 0 if converged, 1 if still improving
-python -m <PACKAGE_NAME>.training.check_convergence checkpoints/<RUN_ID>
+uv run python -m <PACKAGE_NAME>.training.check_convergence checkpoints/<RUN_ID>
 ```
 
 ## Configuration
@@ -117,21 +131,19 @@ When a run is interrupted or you want to try different optimizer/LR from a check
 | `TRAINLOG.md` | Training runs — planned + completed with config links | Before and after every training run |
 | `IO.md` | Input/output formats with actual data examples | When data pipeline changes |
 
-## Dependencies
+## Environment
 
+`pyproject.toml` is the single source of truth for dependencies; `uv.lock` pins exact versions; `.python-version` pins the interpreter.
+
+```bash
+uv sync                              # create .venv/ from uv.lock
+uv add <package>                     # add a runtime dep
+uv add --group dev <package>         # add a dev-only dep
+uv lock --upgrade-package <package>  # bump one package
+uv run pytest                        # run tests in the project env
 ```
-# Core
-python>=3.10
-torch  # or tensorflow
-numpy
-pyyaml
 
-# Visualization
-matplotlib
-seaborn
-
-# (Add project-specific dependencies here)
-```
+Python range: `>=3.10,<3.13`. Do not use `pip` or `requirements.txt` — they bypass the lockfile and cause drift between local and VM.
 
 ## Model
 

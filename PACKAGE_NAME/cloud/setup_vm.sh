@@ -117,16 +117,22 @@ for dir in "${SYMLINKS[@]}"; do
     fi
 done
 
-# === Step 6: Install dependencies (optional) ===
+# === Step 6: Provision Python env via uv ===
 echo ""
-echo "=== Verifying Python ==="
-python3 --version || echo "WARNING: Python 3 not found. Install it manually."
+echo "=== Provisioning Python env (uv) ==="
 
-if [ -f "$PROJECT_DIR/requirements.txt" ]; then
-    echo "Installing Python dependencies..."
-    pip3 install -r "$PROJECT_DIR/requirements.txt"
+if ! command -v uv >/dev/null 2>&1; then
+    echo "uv not found; installing..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+uv --version
+
+if [ -f "$PROJECT_DIR/pyproject.toml" ]; then
+    echo "Syncing dependencies from $PROJECT_DIR (honours uv.lock + .python-version)..."
+    (cd "$PROJECT_DIR" && uv sync --frozen)
 else
-    echo "No requirements.txt found. Skipping dependency install."
+    echo "No pyproject.toml found in $PROJECT_DIR. Skipping dependency install."
 fi
 
 # === Done ===
