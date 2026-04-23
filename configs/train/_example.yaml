@@ -1,0 +1,56 @@
+# =============================================================================
+# Tier 4: Training Configuration (_example.yaml)
+# =============================================================================
+# Copy this file to configs/train/<your_experiment>.yaml and fill in the values.
+# This is the top-level config passed to train.py.
+# It references data and feature configs, and overrides any default.yaml values.
+
+experiment_name: "<EXPERIMENT_NAME>"     # Human-readable experiment name
+run_id: "<RUN_ID>"                       # UNIQUE run identifier — determines folder names:
+                                         #   checkpoints/<run_id>/
+                                         #   logs/training/<run_id>.log
+
+# --- Config references (Tier 2 + Tier 3) ---
+# Single dataset:
+data_config: "<DATASET_NAME>"            # Loads configs/data/<DATASET_NAME>.yaml
+# Multi-dataset (for generalist/mixed training):
+# datasets:
+#   - coco2017                           # Loads configs/data/coco2017.yaml
+#   - mpii                               # Loads configs/data/mpii.yaml
+#   - crowdpose                          # Loads configs/data/crowdpose.yaml
+feature_config: "<METHOD_NAME>"          # Loads configs/feature/<METHOD_NAME>.yaml
+
+# --- Model overrides (override default.yaml) ---
+model:
+  pretrained_weights: null               # Path to pretrained weights, or null
+  checkpoint_path: null                  # Path to init from (e.g., checkpoints/<prev_run>/weights/best.pt)
+  device: 0                              # GPU index, list for DDP [0,1], or "cpu"
+
+# --- Training parameters ---
+training:
+  epochs: 100                            # Maximum number of epochs
+  batch_size: 32                         # Training batch size (per GPU if DDP)
+  patience: 20                           # Early stopping patience (0 = disabled)
+  freeze: 0                              # Number of layers to freeze (0 = train all)
+  optimizer: "Adam"                      # Adam, SGD, AdamW
+  lr: 0.001                              # Initial learning rate
+  lrf: 0.01                              # Final LR as fraction of lr (for cosine: lr * lrf)
+  weight_decay: 0.0001                   # L2 regularization
+  scheduler: "cosine"                    # cosine, step, plateau, none
+  scheduler_params: {}                   # Scheduler-specific params (e.g., {step_size: 30, gamma: 0.1})
+  warmup_epochs: 3.0                     # Warmup epochs before full LR
+  amp: true                              # Automatic mixed precision
+  gradient_clip: null                    # Max gradient norm (null = disabled)
+  seed: 42                               # Random seed for reproducibility
+  resume: false                          # Resume from last.pt (set true or use --resume CLI flag)
+
+# --- Dataloader ---
+dataloader:
+  num_workers: 8                         # Number of data loading workers
+  pin_memory: true                       # Pin memory for GPU transfer
+
+# --- Logging ---
+logging:
+  tensorboard: true                      # Enable TensorBoard
+  log_interval: 100                      # Log every N steps
+  save_interval: 1                       # Save checkpoint every N epochs

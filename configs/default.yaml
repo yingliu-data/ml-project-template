@@ -1,0 +1,32 @@
+# =============================================================================
+# Tier 1: Base Configuration (default.yaml)
+# =============================================================================
+# Shared defaults for all experiments. Overridden by data, feature, and train configs.
+# Merge order: default.yaml → data/<name>.yaml → feature/<name>.yaml → train/<name>.yaml
+
+model:
+  name: "<MODEL_ARCHITECTURE>"          # e.g., YOLOv8n-Pose, ResNet50, ConvAutoencoder
+  pretrained_weights: null               # Path or URL to pretrained weights (null = train from scratch)
+  checkpoint_path: null                  # Path to resume from a previous run's checkpoint
+                                         # Priority: checkpoint_path > pretrained_weights > train from scratch
+  input_size: 640                        # Input resolution (single int for square, or [H, W])
+  device: 0                              # GPU device index, list for DDP [0,1], or "cpu"
+
+augmentation:
+  # Common augmentation defaults — override per experiment if needed
+  horizontal_flip: 0.5                   # Probability of horizontal flip
+  vertical_flip: 0.0                     # Probability of vertical flip
+  rotation: 0.0                          # Max rotation degrees
+  scale: [0.8, 1.2]                      # Scale range [min, max]
+  # Add framework-specific augmentation params here
+
+visualization:
+  num_train_samples: 3                   # Random train samples to preview per run
+  num_test_samples: 3                    # Random test samples to preview per run
+  output_dir: visualization              # Relative path for auto-generated plots
+  dpi: 150                               # Plot resolution
+
+logging:
+  tensorboard: true                      # Enable TensorBoard logging
+  log_interval: 100                      # Log metrics every N steps
+  save_interval: 1                       # Save checkpoint every N epochs

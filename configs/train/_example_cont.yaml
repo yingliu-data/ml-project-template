@@ -1,0 +1,46 @@
+# =============================================================================
+# Tier 4: Continuation Training Configuration (_example_cont.yaml)
+# =============================================================================
+# Use this template when continuing training from a previous run's best checkpoint.
+# Common reasons: run was interrupted, model still improving, trying different optimizer/LR.
+#
+# Copy to configs/train/<experiment>_cont.yaml and fill in the values.
+
+experiment_name: "<EXPERIMENT_NAME>_cont"  # Append _cont to original experiment name
+run_id: "<RUN_ID>_cont"                   # Unique ID for continuation run
+
+# --- Config references (same datasets as original run) ---
+data_config: "<DATASET_NAME>"
+feature_config: "<METHOD_NAME>"
+
+# --- Model: start from previous run's best checkpoint ---
+model:
+  checkpoint_path: "checkpoints/<PREV_RUN_ID>/weights/best.pt"  # Previous run's best checkpoint
+  device: 0
+
+# --- Training: typically change optimizer/LR for fine-grained convergence ---
+training:
+  epochs: 2000                           # Higher epoch budget for continuation
+  batch_size: 32                         # May need to reduce if switching to single GPU
+  patience: 50                           # Same or larger patience
+  freeze: 0                              # Keep same freeze as original (or unfreeze for fine-tuning)
+  optimizer: "AdamW"                     # Consider switching from SGD → AdamW for continuation
+  lr: 0.0003                             # Lower LR than original (e.g., 3e-4)
+  lrf: 0.01                              # Cosine decay to lr * lrf
+  weight_decay: 0.0005
+  scheduler: "cosine"
+  warmup_epochs: 3.0
+  amp: true
+  seed: 42
+  resume: false                          # false = new run from checkpoint, true = resume exact state
+
+# --- Dataloader ---
+dataloader:
+  num_workers: 16
+  pin_memory: true
+
+# --- Logging ---
+logging:
+  tensorboard: true
+  log_interval: 100
+  save_interval: 1

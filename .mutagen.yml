@@ -1,0 +1,17 @@
+sync:
+  defaults:
+    ignore:
+      paths:
+        - "data"
+        - "checkpoints"
+        - "logs"
+        - "__pycache__"
+        - "*.npy"
+        - "*.npz"
+        - "*.h5"
+        - "*.keras"
+        - "*.tflite"
+        - "*.pt"
+        - "*.pth"
+        - "nohup.out"
+        - ".DS_Store"

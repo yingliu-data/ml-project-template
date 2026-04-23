@@ -1,0 +1,39 @@
+# =============================================================================
+# Tier 3: Feature Engineering Configuration (_example.yaml)
+# =============================================================================
+# Copy this file to configs/feature/<your_method>.yaml and fill in the values.
+# Referenced by train configs via: feature_config: <your_method>
+# Processed data is cached in: data/processed/<your_method>/
+
+name: "<METHOD_NAME>"                    # Human-readable method name
+cache_dir: "data/processed/<METHOD_NAME>"  # Where to save processed features
+
+# Preprocessing
+preprocessing:
+  sampling_rate: null                    # Sampling rate in Hz (null if not applicable)
+  normalization: "none"                  # none, minmax, standardize, per_channel
+  normalization_params: {}               # e.g., {min: -1, max: 1} for minmax
+  clip_range: null                       # [min, max] to clip values (null = no clipping)
+
+# Feature extraction
+extraction:
+  method: "raw"                          # raw, stats, spectral, embeddings, custom
+  window_length: null                    # Window length in samples (null if not windowed)
+  window_stride: null                    # Window stride in samples (null if not windowed)
+  features: []                           # List of features to extract (method-specific)
+  # Example for stats method:
+  # features: [mean, std, min, max]
+  # Example for spectral method:
+  # features: [fft_magnitude, fft_phase]
+
+# Dimensionality reduction (optional)
+reduction:
+  method: null                           # null, pca, tsne, umap
+  params:
+    n_components: null                   # Number of components (or variance ratio for PCA)
+
+# Feature augmentation (optional, applied during feature engineering)
+augmentation:
+  enabled: false
+  methods: []                            # List of augmentation methods
+  # Example: [noise_injection, time_warp, rotation]

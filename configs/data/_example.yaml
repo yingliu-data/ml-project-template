@@ -1,0 +1,28 @@
+# =============================================================================
+# Tier 2: Dataset Configuration (_example.yaml)
+# =============================================================================
+# Copy this file to configs/data/<your_dataset>.yaml and fill in the values.
+# Referenced by train configs via: data_config: <your_dataset>
+
+name: "<DATASET_NAME>"                   # Human-readable dataset name
+data_dir: "/mnt/data/<PROJECT_NAME>/data/raw/<DATASET_NAME>"  # Root directory of the dataset
+
+# Paths relative to data_dir
+train:
+  images: "train/"                       # Training images/data directory
+  annotations: "annotations/train.json"  # Training annotations (if applicable)
+val:
+  images: "val/"                         # Validation images/data directory
+  annotations: "annotations/val.json"    # Validation annotations (if applicable)
+test:
+  images: "test/"                        # Test images/data directory (optional)
+  annotations: "annotations/test.json"   # Test annotations (optional)
+
+# Dataset characteristics
+num_samples: 0                           # Total number of samples (for reference)
+num_classes: 0                           # Number of classes (0 or null for regression)
+input_shape: [0, 0, 0]                   # Shape of a single input sample [H, W, C] or [features]
+class_names: []                          # List of class names (if classification)
+
+# Format-specific fields
+file_format: "json"                      # json, csv, npy, npz, images, mat, etc.
